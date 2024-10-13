@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiu.library.mapper.BookMapper">
+
+    <insert id="save">
+        insert into book(name,description,publish_date,author,publisher,book_no,cover,categoryid,score,nums)
+        values(#{name},#{description},#{publishDate},#{author},#{publisher},#{bookNo},#{cover},#{categoryid},#{score},#{nums})
+    </insert>
+
+    <update id="updateById">
+        update book set name = #{name},description = #{description},publish_date = #{publishDate},author = #{author},
+        publisher = #{publisher},book_no = #{bookNo},cover = #{cover},categoryid = #{categoryid},score = #{score},nums = #{nums},updatetime = #{updatetime}
+        where id = #{id}
+    </update>
+
+    <update id="deleteById">
+        update book set isdeleted = 1
+        where id = #{id}
+    </update>
+    <update id="updateNumsByNo">
+        update book set nums = nums + 1
+        where book_no = #{bookNo}
+    </update>
+
+    <select id="SelectAllBook" resultType="com.qiu.library.entity.Book">
+        select * from book where isdeleted = 0
+    </select>
+
+    <select id="listByCondition" resultType="com.qiu.library.common.vo.BookPageVo">
+        select b.*,c.name as categoryName from book b left join category c
+        on b.categoryid = c.id
+        <where>
+            <if test="isdeleted != null">
+                b.isdeleted = 0
+            </if>
+            <if test="name != null and name != ''">
+               and b.name like concat('%',#{name},'%')
+            </if>
+            <if test="bookNo != null and bookNo != ''">
+                and b.book_no like concat('%',#{bookNo},'%')
+            </if>
+        </where>
+        order by b.id desc
+    </select>
+
+    <select id="getById" resultType="com.qiu.library.common.vo.BookPageVo">
+        select b.*,c.name as categoryName from book b left join category c
+        on b.categoryid = c.id
+        where b.id = #{id}
+    </select>
+    <select id="getByNo" resultType="com.qiu.library.entity.Book">
+        select * from book where book_no = #{bookNo}
+    </select>
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiu.library.mapper.AdminMapper">
+
+    <insert id="save">
+        insert into admin(username,phone,email,password) values(#{username},#{phone},#{email},#{password})
+    </insert>
+
+    <update id="updateById">
+        update admin set username = #{username},password = #{password},email = #{email}, phone = #{phone},updatetime = #{updatetime}
+        where id = #{id}
+    </update>
+
+    <update id="deleteById">
+        update admin set isdeleted = 1
+        where id = #{id}
+    </update>
+    <update id="changeStatus">
+        update admin set status = !status
+        where id = #{id}
+    </update>
+
+    <select id="selectAllUsers" resultType="com.qiu.library.entity.Admin">
+        select * from admin where isdeleted = 0
+    </select>
+
+    <select id="listByCondition" resultType="com.qiu.library.entity.Admin">
+        select * from admin
+        <where>
+            <if test="isdeleted != null">
+                isdeleted = 0
+            </if>
+            <if test="username != null and username != ''">
+               and username like concat('%',#{username},'%')
+            </if>
+            <if test="phone != null and phone != ''">
+                and phone like concat('%',#{phone},'%')
+            </if>
+            <if test="email != null and email != ''">
+                and email like concat('%',#{email},'%')
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.qiu.library.entity.Admin">
+        select * from admin where id = #{id}
+    </select>
+    <select id="login" resultType="com.qiu.library.entity.Admin">
+        select * from admin where username = #{username} and password = #{password}
+    </select>
+
+</mapper>

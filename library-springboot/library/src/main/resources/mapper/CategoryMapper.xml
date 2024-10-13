@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiu.library.mapper.CategoryMapper">
+
+    <insert id="save">
+        insert into category(name,remark,pid) values(#{name},#{remark},#{pid})
+    </insert>
+
+    <update id="updateById">
+        update category set name = #{name},remark = #{remark},updatetime = #{updatetime},pid = #{pid}
+        where id = #{id}
+    </update>
+
+    <update id="deleteById">
+        update category set isdeleted = 1
+        where id = #{id}
+    </update>
+
+    <select id="SelectAllCategory" resultType="com.qiu.library.entity.Category">
+        select * from category where isdeleted = 0
+    </select>
+
+    <select id="listByCondition" resultType="com.qiu.library.common.vo.CategoryPageVo">
+        select  c1.*,c2.name as pname  from category c1 left join category c2
+        on c1.pid = c2.id
+        <where>
+            <if test="isdeleted != null">
+                c1.isdeleted = 0
+            </if>
+            <if test="name != null and name != ''">
+               and c1.name like concat('%',#{name},'%')
+            </if>
+            <if test="remark != null and remark != ''">
+                and c1.remark like concat('%',#{remark},'%')
+            </if>
+        </where>
+        order by c1.id desc
+    </select>
+
+    <select id="getById" resultType="com.qiu.library.entity.Category">
+        select * from category where id = #{id}
+    </select>
+
+    <select id="SelectAllParentCategory" resultType="com.qiu.library.entity.Category">
+        select * from category where pid is null and isdeleted = 0
+    </select>
+
+
+    <select id="getByParentId" resultType="com.qiu.library.entity.Category">
+        select * from category where pid = #{id} and isdeleted = 0
+    </select>
+
+
+    <resultMap id="categoryMap" type="com.qiu.library.common.dto.CategoryDTO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="remark" column="remark"/>
+        <result property="pid" column="pid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="updatetime" column="updatetime"/>
+        <result property="isdeleted" column="isdeleted"/>
+        <collection property="children" ofType="com.qiu.library.common.dto.CategoryDTO" column="id" select="selectPid"/>
+    </resultMap>
+    <select id="selectPid" resultType="com.qiu.library.common.dto.CategoryDTO">
+        select * from category where pid = #{id} and isdeleted = 0
+    </select>
+    <select id="listByMap" resultMap="categoryMap">
+        select * from category
+        where pid is null
+        and isdeleted = 0
+        order by id desc
+    </select>
+
+
+    <select id="getCategoryTree" resultType="com.qiu.library.common.dto.CategoryDTO">
+        select * from category where  isdeleted = 0
+    </select>
+
+</mapper>

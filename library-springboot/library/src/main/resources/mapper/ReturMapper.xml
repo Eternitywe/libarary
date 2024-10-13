@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiu.library.mapper.ReturMapper">
+
+    <insert id="save">
+        insert into retur(book_name,book_no,user_id,user_no,user_name,user_phone,score,days,return_date,real_date,createtime)
+        values(#{bookName},#{bookNo},#{userId},#{userNo},#{userName},#{userPhone},#{score},#{days},#{returnDate},#{realDate},#{createtime})
+    </insert>
+
+    <update id="updateById">
+        update retur set book_name = #{bookName},book_no = #{bookNo},user_id = #{userId},user_no = #{userNo},
+        user_name = #{userName},user_phone = #{userPhone},score = #{score},status = #{status},days = #{days},
+        return_date = #{returnDate},real_date = #{realDate},updatetime = #{updatetime}
+        where id = #{id}
+    </update>
+
+    <update id="deleteById">
+        update retur set isdeleted = 1
+        where id = #{id}
+    </update>
+
+    <select id="SelectAllRetur" resultType="com.qiu.library.entity.Retur">
+        select * from retur where isdeleted = 0
+    </select>
+
+    <select id="listByCondition" resultType="com.qiu.library.common.vo.ReturPageVo">
+        select * from retur
+        <where>
+            <if test="isdeleted != null">
+                isdeleted = 0
+            </if>
+            <if test="userName != null and userName != ''">
+               and user_name like concat('%',#{userName},'%')
+            </if>
+            <if test="bookNo != null and bookNo != ''">
+                and book_no like concat('%',#{bookNo},'%')
+            </if>
+            <if test="bookName != null and bookName != ''">
+                and book_name like concat('%',#{bookName},'%')
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.qiu.library.entity.Retur">
+        select * from retur where id = #{id}
+    </select>
+    <select id="getCountByTimeRange" resultType="com.qiu.library.common.dto.BorrowReturCountDTO">
+        select DATE_FORMAT(real_date,'%Y-%m-%d') as date,count(*) as count from retur
+        where
+        <choose>
+            <when test="timeRange == 'week'">
+                createtime >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+            </when>
+            <when test="timeRange == 'month'">
+                createtime >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+            </when>
+            <when test="timeRange == 'month2'">
+                createtime >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+            </when>
+            <otherwise>
+                createtime > now()
+            </otherwise>
+        </choose>
+        group by date
+    </select>
+</mapper>
